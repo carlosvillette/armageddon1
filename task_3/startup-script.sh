@@ -1,30 +1,35 @@
+#Thanks to Remo
 #!/bin/bash
 # Update and install Apache2
-apt-get update
-apt-get install -y apache2
+apt update
+apt install -y apache2
 
 # Start and enable Apache2
 systemctl start apache2
 systemctl enable apache2
 
-# Set up a simple HTML page
+# GCP Metadata server base URL and header
+METADATA_URL="http://metadata.google.internal/computeMetadata/v1"
+METADATA_FLAVOR_HEADER="Metadata-Flavor: Google"
+
+# Use curl to fetch instance metadata
+local_ipv4=$(curl -H "${METADATA_FLAVOR_HEADER}" -s "${METADATA_URL}/instance/network-interfaces/0/ip")
+zone=$(curl -H "${METADATA_FLAVOR_HEADER}" -s "${METADATA_URL}/instance/zone")
+project_id=$(curl -H "${METADATA_FLAVOR_HEADER}" -s "${METADATA_URL}/project/project-id")
+network_tags=$(curl -H "${METADATA_FLAVOR_HEADER}" -s "${METADATA_URL}/instance/tags")
+
+# Create a simple HTML page and include instance details
 cat <<EOF > /var/www/html/index.html
-<html>
-<head>
-    <title>Welcome to the start of the journey</title>
-</head>
-<body>
-    <h1>It ends in death, but the journey is worth it</h1>
-    <p>People need people - even in the times we least expect it..</p>
-    <img src="JandK.png" alt="Image 1">
-    <img src="JandN.jpg" alt="Image 2">
-    <p>This content is accessible only within specified networks.</p>
-</body>
-</html>
+<html><body>
+<h2>Welcome to your Armegeddon.</h2>
+<h3>There's no easy way out. No short cuts to success.</h3>
+<h4>Victory is sweeter at the end!"</h4>
+<iframe width="560" height="315" src="https://www.youtube.com/embed/12c6LeRMF7Q?autoplay=1&mute=1"></iframe>
+
+<p><b>Instance Name:</b> $(hostname -f)</p>
+<p><b>Instance Private IP Address: </b> $local_ipv4</p>
+<p><b>Zone: </b> $zone</p>
+<p><b>Project ID:</b> $project_id</p>
+<p><b>Network Tags:</b> $network_tags</p>
+</body></html>
 EOF
-
-# [PERSONAL] Setup server or application-specific configurations
-# Example: setup logs, monitoring, or other services
-
-# Restart Apache to load new configuration
-systemctl restart apache2
