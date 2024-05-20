@@ -9,6 +9,6 @@ terraform {
 
 provider "google" {
   # Configuration options
-  project = "burnished-ether-417100"
-  credentials = "../burnished-ether-417100-069d8826cf19.json"
+  credentials = var.credentials
+  project     = var.project_id
 }

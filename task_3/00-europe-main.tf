@@ -1,8 +1,3 @@
-provider "google" {
-  credentials = var.credentials
-  project     = var.project_id
-  region      = var.european_region
-}
 
 # European Network and Subnetwork
 resource "google_compute_network" "european_network" {
