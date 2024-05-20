@@ -4,7 +4,7 @@ variable "project_id" {
 }
 
 variable "credentials" {
-  default     = "../../../armageddon1/burnished-ether-417100-069d8826cf19.json"
+  default     = "../../armageddon1/burnished-ether-417100-069d8826cf19.json"
   description = "value of the credentials"
   sensitive   = true
 }
