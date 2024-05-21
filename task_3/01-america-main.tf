@@ -21,12 +21,12 @@ resource "google_compute_subnetwork" "american_subnet2" {
   network       = google_compute_network.american_network1.id
   private_ip_google_access = true
 }
-
+/*
 resource "google_service_account" "america" {
   account_id = "america"
   display_name = "VM service account"
 }
-
+*/
 # Peering between American and European Networks
 resource "google_compute_network_peering" "us_to_eu_peering1" {
   name         = "us-to-eu-peering1"

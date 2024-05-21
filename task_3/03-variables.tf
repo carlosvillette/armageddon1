@@ -42,7 +42,12 @@ variable "instance_type" {
 
 variable "instance_image" {
   default     = "debian-cloud/debian-11"
-  description = "value of the instance image"
+  description = "value of the linux instance image"
+}
+
+variable "instance_image_windows" {
+  default = "projects/windows-cloud/global/images/windows-server-2022-dc-v20240516"
+  description = "value of the windows instance image"
 }
 
 variable "asian_vpn_peer_ip" {

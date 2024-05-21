@@ -1,5 +1,6 @@
 output "europe_vpn_gateway_ip" {
-  value       = var.europe_vpn_peer_ip
+  #value       = var.europe_vpn_peer_ip
+  value = google_compute_address.european_vpn_gateway_ip.address
   description = "The Peer IP address of the European VPN gateway."
 }
 

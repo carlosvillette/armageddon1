@@ -42,6 +42,7 @@ resource "google_compute_vpn_gateway" "asian_vpn_gateway" {
 resource "google_compute_address" "asian_vpn_gateway_ip" {
   name   = "asia-vpn-gateway-ip"
   region = var.asian_region
+  #network = google_compute_network.asian_network
 }
 
 resource "google_compute_forwarding_rule" "asian_esp" {
@@ -50,7 +51,7 @@ resource "google_compute_forwarding_rule" "asian_esp" {
   ip_protocol = "ESP"
   ip_address  = google_compute_address.asian_vpn_gateway_ip.address
   target      = google_compute_vpn_gateway.asian_vpn_gateway.self_link
-  depends_on = [ google_compute_vpn_gateway.european_vpn_gateway]
+  depends_on = [ google_compute_vpn_gateway.asian_vpn_gateway]
 }
 
 resource "google_compute_forwarding_rule" "asian_udp500" {
@@ -60,7 +61,7 @@ resource "google_compute_forwarding_rule" "asian_udp500" {
   ip_address  = google_compute_address.asian_vpn_gateway_ip.address
   port_range  = "500"
   target      = google_compute_vpn_gateway.asian_vpn_gateway.self_link
-  depends_on = [ google_compute_vpn_gateway.european_vpn_gateway]
+  depends_on = [ google_compute_vpn_gateway.asian_vpn_gateway]
 }
 
 resource "google_compute_forwarding_rule" "asian_udp4500" {
@@ -70,7 +71,7 @@ resource "google_compute_forwarding_rule" "asian_udp4500" {
   ip_address  = google_compute_address.asian_vpn_gateway_ip.address
   port_range  = "4500"
   target      = google_compute_vpn_gateway.asian_vpn_gateway.self_link
-  depends_on = [ google_compute_vpn_gateway.european_vpn_gateway]
+  depends_on = [ google_compute_vpn_gateway.asian_vpn_gateway]
 }
 
 resource "google_compute_vpn_tunnel" "asian_to_europe_tunnel" {
@@ -80,14 +81,44 @@ resource "google_compute_vpn_tunnel" "asian_to_europe_tunnel" {
   peer_ip                 = google_compute_address.european_vpn_gateway_ip.address
   shared_secret           = var.vpn_shared_secret
   ike_version             = 2
-  local_traffic_selector  = ["192.168.11.0/24"]
-  remote_traffic_selector = ["10.150.11.0/24"]
+  local_traffic_selector  = [google_compute_subnetwork.asian_subnet.ip_cidr_range]
+  #local_traffic_selector  = ["192.168.11.0/24"]
+  remote_traffic_selector = [google_compute_subnetwork.european_subnet.ip_cidr_range]
   depends_on = [
     google_compute_forwarding_rule.asian_esp,
     google_compute_forwarding_rule.asian_udp500
   ]
 }
 
+resource "google_compute_route" "ap2eu" {
+  name = "ap-hop-2-eu"
+  network = google_compute_network.asian_network.id
+  dest_range = google_compute_subnetwork.european_subnet.ip_cidr_range
+  next_hop_vpn_tunnel = google_compute_vpn_tunnel.asian_to_europe_tunnel.id
+  priority = 100
+}
+
 resource "google_project_service" "cloudresourcemanager" {
   service = "cloudresourcemanager.googleapis.com"
+}
+
+resource "google_compute_instance" "asia-instance" {
+  depends_on = [ google_compute_subnetwork.asian_subnet ]
+  name         = "asia-instance"
+  machine_type = var.instance_type
+  zone         = "${var.asian_region}-b"
+  boot_disk {
+    initialize_params {
+      image = var.instance_image_windows
+    }
+  }
+
+  network_interface {
+    network = google_compute_network.asian_network.id
+    subnetwork = google_compute_subnetwork.asian_subnet.id
+    access_config {
+      // Ephemeral IP, no external IP
+    }
+  }
+
 }
