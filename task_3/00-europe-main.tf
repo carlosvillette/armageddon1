@@ -64,7 +64,7 @@ resource "google_compute_firewall" "eu_http" {
   log_config {
     metadata = "INCLUDE_ALL_METADATA"
   }
-  source_ranges = [google_compute_subnetwork.american_subnet1.ip_cidr_range,google_compute_subnetwork.american_subnet2.ip_cidr_range, "192.168.0.0/16","0.0.0.0/0"]
+  source_ranges = [google_compute_subnetwork.american_subnet1.ip_cidr_range,google_compute_subnetwork.american_subnet2.ip_cidr_range, "192.168.0.0/16"]
   depends_on = [ google_compute_network.european_network ]
 }
 
